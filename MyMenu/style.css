@@ -1,0 +1,121 @@
+body {
+    width: 100%;
+    margin: 0 auto;
+    padding:0;
+    font-family:Quicksand;
+    font-weight:700;
+}
+        
+nav {
+    position: fixed;
+    z-index: 10;
+    opacity: 0.8;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    min-width: 420px;
+    height: 290px;
+    background: url('aside_back.jpg') ;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+}
+
+nav ul {    
+    list-style: none;
+    background: url('ul_back.png');
+    margin: 10px;
+    padding: 10px;
+    height: 250px;
+    border-radius: 9px;
+    -moz-border-radius: 9px;
+    -webkit-border-radius: 9px;
+
+}
+
+ul li a{
+    text-indent:-9999px;
+    height: 50px;
+    width: 100%;
+    display: block;
+}
+
+ul li:nth-child(1) a {
+    background:url('Text_normal.png') 0 0 no-repeat;  
+}
+
+ul li:nth-child(2) a {
+    background:url('Text_normal.png') 0 -50px no-repeat; 
+}
+
+ul li:nth-child(3) a {
+    background:url('Text_normal.png') 0 -100px no-repeat; 
+}
+
+ul li:nth-child(4) a {
+    background:url('Text_normal.png') 0 -150px no-repeat; 
+}
+
+ul li:nth-child(5) a {
+    background:url('Text_normal.png') 0 -200px no-repeat; 
+}
+
+ul li:nth-child(1) a:hover {
+    background:url('Text_hover.png') 0 0 no-repeat;  
+}
+
+ul li:nth-child(2) a:hover {
+    background:url('Text_hover.png') 0 -50px no-repeat; 
+}
+
+ul li:nth-child(3) a:hover {
+    background:url('Text_hover.png') 0 -100px no-repeat; 
+}
+
+ul li:nth-child(4) a:hover {
+    background:url('Text_hover.png') 0 -150px no-repeat; 
+}
+
+ul li:nth-child(5) a:hover {
+    background:url('Text_hover.png') 0 -200px no-repeat; 
+}
+
+ul li:nth-child(1) a:active {
+    background:url('Text_active.png') 0 0 no-repeat;  
+}
+
+ul li:nth-child(2) a:active {
+    background:url('Text_active.png') 0 -50px no-repeat; 
+}
+
+ul li:nth-child(3) a:active {
+    background:url('Text_active.png') 0 -100px no-repeat; 
+}
+
+ul li:nth-child(4) a:active {
+    background:url('Text_active.png') 0 -150px no-repeat; 
+}
+
+ul li:nth-child(5) a:active {
+    background:url('Text_active.png') 0 -200px no-repeat; 
+}
+
+ul li a:after {
+    position: absolute;
+    content: "";
+    right: 20px;
+    width: 80px;
+    height: 50px;
+    background: url('MenuCursor.png');
+    animation: play .8s steps(10) infinite;
+    animation-play-state: paused;
+}
+ul li a:hover:after {
+    animation-play-state: running;
+}
+
+
+@keyframes play {
+    100% { background-position: -800px; }
+}
