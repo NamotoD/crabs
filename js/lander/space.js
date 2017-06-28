@@ -18,8 +18,6 @@ function init() {
     transparentBackground.setPosition(window.innerWidth / 2, window.innerHeight / 2);
     transparentBackground.setSpeed(0);
     spacecrabs.push(new SpaceCrab());
-    lander = new Lander();
-    platform = new Platform();
     life_250 = new Life_250();
     
     stats = document.getElementById("game_stats");
@@ -40,31 +38,20 @@ function init() {
 function update() {
     scene.clear();
     transparentBackground.update();
-    platform.update();
-    lander.checkGravity();
-    lander.checkKeys();
-    lander.showStats();
-    lander.checkLanding();
-    lander.checkLife();
-
-    checkLifeCollisions();
     
     for (i = 0; i < NUMSPACEMOTHS; i++) {
         spacemoths[i].wriggle();
-        checkMothCollisions(i);
         spacemoths[i].update();
     } // end for loop
     
-    if (spacecrabs.length < 3) {
+    if (spacecrabs.length < 30) {
         spacecrabs.push(new SpaceCrab());
     }
     for (i = 0; i < spacecrabs.length; i++) {
         spacecrabs[i].changeDirectionEvery2Seconds();
-        checkCrabCollisions(i);
         spacecrabs[i].update();
     }
-    
-    lander.update();
+    life_250.showStats();
     life_250.update();
 } // end update
 
@@ -75,173 +62,9 @@ function setupSpaceMoths() {
     } // end for
 } // end setupSpaceMoths
 
-function checkMothCollisions(spaceMothNum) {
-    if (!lander.immortable && lander.collidesWith(spacemoths[spaceMothNum])) {
-        spacemoths[spaceMothNum].reset();
-        lander.life -= 250;
-        moth_crashMP3.play();
-        moth_crashOGG.play();
-    } // end if
-} // end checkCollisions
-
-function checkCrabCollisions(spaceCrabNum) {
-    if (!lander.immortable && lander.collidesWith(spacecrabs[spaceCrabNum])) {
-        spacecrabs[spaceCrabNum].reset();
-        lander.life -= 250;
-        moth_crashMP3.play();
-        moth_crashOGG.play();
-    } // end if
-} // end checkCollisions
-
-function checkLifeCollisions() {
-    if (lander.collidesWith(life_250)) {
-        lander.life += 250;
-        life_250MP3.play();
-        life_250OGG.play();
-        life_250.reset();
-    } // end if
-} // end checkCollisions
-
 function restart() {
     document.location.href = "";
 } // end restart
-
-function Lander() {
-    tLander = new Sprite(scene, "img/lander/lander.png", (window.innerWidth + window.innerHeight) / 25, (window.innerWidth + window.innerHeight) / 25);
-    tLander.setSpeed(0);
-    tLander.falling = true;
-    tLander.life = 1000;
-    tLander.immortable = true;
-    tLander.imgDefault = "img/lander/lander.png";
-    tLander.imgUp = "img/lander/landerUp.png";
-    tLander.imgLeft = "img/lander/landerLeft.png";
-    tLander.imgRight = "img/lander/landerRight.png";
-    tLander.imgTransparent = "img/lander/landerTransparent.png";
-    tLander.setRandomPosition = function () {
-        x = Math.random() * scene.width;
-        y = Math.random() * scene.height;
-        this.setPosition(x, y);
-    };
-    tLander.myTimer = new Timer();
-    tLander.blink = function (direction) {
-        this.image.src.substring(this.image.src.lastIndexOf('/img/lander') + 1) !== this.imgTransparent ?
-        this.setImage(this.imgTransparent) :
-        this.setImage(direction);
-    }; // end blink    
-    tLander.blinkOrNot = function (direction) {
-        if (this.myTimer.getElapsedTime() < 5) {
-            this.blink(direction);
-        } else {
-            this.setImage(direction);
-            this.immortable = false;
-        }
-    }; // end blinkOrNot    
-    tLander.checkGravity = function () {
-        if (this.falling) {
-          this.addVector(180, 0.1);
-        } // end if
-    }; // end checkGravity
-    tLander.checkLife = function () {
-    if (this.life <= 0) {
-        scene.stop();
-        } //end if statement
-    if (this.life <= 500) {
-        life_250.show();
-        }// end if
-    }; // end checkGravity
-    
-    tLander.checkKeys = function(){
-
-        if (keysDown[K_UP]){
-            fuel -= 5;
-                this.addVector(0, 0.3);
-                this.blinkOrNot(this.imgUp);
-                this.falling = true;
-        }
-        
-        else if (keysDown[K_LEFT]){
-            fuel -= 1;
-                this.addVector(90, 0.1);
-                this.blinkOrNot(this.imgLeft);
-
-        } // end if
-        
-        else if (keysDown[K_RIGHT]){
-            fuel -= 1;
-                this.addVector(270, 0.1);
-                this.blinkOrNot(this.imgRight);
-
-        }  else {
-                this.blinkOrNot(this.imgDefault);
-
-        }// end if
-        
-    }; // end checkKeys
-    
-    
-    tLander.showStats = function(){
-        //displays stats
-        output = "DX: " + Math.round(this.dx * 10) + "<br />";
-        output += "DY: " + Math.round(this.dy * 10) + "<br />";
-        output += "ALT: " + Math.round(525 - this.y) + "<br />";
-        output += "MSG: " + message + "<br />";
-        output += "LIFE: " + lander.life + "<br />";
-        output += "FUEL: " + fuel;
-        
-        stats.innerHTML = output;
-    }; // end showStats
-    
-    tLander.checkLanding = function(){
-      if (this.falling){
-        if (this.y +(this.height/2)> platform.y+(platform.height/2) && this.y +(this.height/2)< platform.y+(platform.height/2)+(platform.height/2)){
-          if (this.x < platform.x + 10){
-            if (this.x > platform.x - 10){
-              if (this.dx < 0.2){
-                if (this.dx > -0.2){
-                  if (this.dy < 2){
-                    message = "Nice Landing!";
-                    this.setSpeed(0);
-                    this.falling = false;
-                    scene.stop();                        
-                    if (spaceImages.length) {
-                        $('nav').show();
-                        $('html').css('background-image', 'url(' + spaceImages.shift() + ')');
-                        this.setRandomPosition();
-                        platform.setRandomPosition();
-                        this.immortable = true;
-                        this.falling = true; 
-                    } else {
-                        alert("Congratulations!");
-                    }
-                  } else {
-                    message = "too much vertical speed";
-                  } // end if
-                } else {
-                    message = "too fast to left";
-                } // end if
-              } else {
-                message = "too fast to right";
-              } // end if                    
-            } // end 'x too big' if
-          } // end 'x too small' if
-        } // end 'y not big enough' if
-      } // end 'are we falling?' if
-    }; // end checkLanding
-            
-    tLander.setRandomPosition();
-    return tLander;
-} // end Lander constructor
-
-function Platform(){
-    tPlatform = new Sprite(scene, "img/lander/r-typesheet28.gif", (window.innerWidth+window.innerHeight)/25, (window.innerWidth+window.innerHeight)/125);
-    tPlatform.setSpeed(0);
-    tPlatform.setRandomPosition = function(){
-        x = Math.random() * scene.width;
-    this.setPosition(x,scene.height*0.9);
-    };
-    tPlatform.setRandomPosition();
-    return tPlatform;
-} // end platform constructor
 
 function SpaceMoth(){
     tSpaceMoth = new Sprite(scene, "img/lander/spacemoth.png", (window.innerWidth+window.innerHeight)/25, (window.innerWidth+window.innerHeight)/25);
@@ -323,6 +146,16 @@ function Life_250(){
         this.hide();
     }; // end reset
     
+    tLife_250.showStats = function(){
+        //displays stats
+        output = "DX: " + Math.round(this.dx * 10) + "<br />";
+        output += "DY: " + Math.round(this.dy * 10) + "<br />";
+        output += "ALT: " + Math.round(525 - this.y) + "<br />";
+        output += "MSG: " + message + "<br />";
+        output += "FUEL: " + fuel;
+        
+        stats.innerHTML = output;
+    }; // end showStats
     tLife_250.reset();
     
     return tLife_250;
@@ -349,8 +182,6 @@ $(window).resize(function() {
         var myResizeDivider = beforeResizeWidth/scene.width;
         platform.setX(platform.x/myResizeDivider);
         platform.setY(platform.y/myResizeDivider);
-        lander.setX(lander.x/myResizeDivider);
-        lander.setY(lander.y/myResizeDivider);
 
         for (i = 0; i < spacecrabs.length; i++){
             spacecrabs[i].setX(spacecrabs[i].x/myResizeDivider);
