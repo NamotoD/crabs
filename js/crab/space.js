@@ -1,15 +1,13 @@
-var scene, transparentBackground, spaceImages = ["img/lander/background/Background-2.jpg", "img/lander/background/Background-3.jpg", "img/lander/background/Background-4.jpg", "img/lander/background/Background-5.jpg", "img/lander/background/Background-6.jpg", "img/lander/background/Background-7.jpg", "img/lander/background/Background-8.jpg", "img/lander/background/Background-9.jpg", "img/lander/background/Background-10.jpg", "img/lander/background/Background-11.jpg", "img/lander/background/Background-12.jpg", "img/lander/background/Background-13.jpg", "img/lander/background/Background-14.jpg"],
-    lander, platform, spacemoths, spacecrabs = [], plants = [], life_250, message = "", spaceMP3, spaceOGG, moth_crashMP3, moth_crashOGG, life_250MP3, life_250OGG, NUMSPACEMOTHS = 3, fuel = 12000, level = 1,
+var scene, spacecrabs = [], plants = [],
+    crabMeetsCrabMP3, crabMeetsCrabOGG, crabMeetsCrabellaMP3, crabMeetsCrabellaOGG,
     dirs = [["left",    270],
             ["right",   90 ],
             ["up",      0  ],
-            ["down",    180]];
-var NUMOFSPACECRABS = 250; var dead = 0; var NUM_OF_PLANTS = 500;
+            ["down",    180]],
+    NUMOFSPACECRABS = 1250, dead = 0, born = 0, NUM_OF_PLANTS = 500, VISIBLE_CRABS_AT_THE_BEGINNING = 30; 
 function populateRandomCrab() {
     Math.random().toString(2)[7] == 0 ? spacecrabs.push(new Crabella()) : spacecrabs.push(new Crabber()); //toString(2) returns binary rep - check last binary if it 0 or 1
-}
-
-var VISIBLE_CRABS_AT_THE_BEGINNING = 30;               
+}              
 function init() {
     scene = new Scene();
     scene.setSize(window.innerWidth, window.innerHeight);
@@ -18,19 +16,20 @@ function init() {
     for (var i = 0; i < VISIBLE_CRABS_AT_THE_BEGINNING; i++) {
         spacecrabs[i].show(); spacecrabs[i].playAnimation(); spacecrabs[i].healthBar.show(); spacecrabs[i].healthBarFollow();
         spacecrabs[i].setPosition(Math.random() * spacecrabs[i].cWidth, Math.random() * spacecrabs[i].cHeight);
+        born++;
         }
     for (var i = 0; i < NUM_OF_PLANTS; i++) {plants.push(new Plant());}
     
     stats = document.getElementById("game_stats");
     
-    moth_crashMP3 = new Sound("sounds/moth_crash.mp3");
-    moth_crashOGG = new Sound("sounds/moth_crash.ogg");
-    life_250MP3 = new Sound("sounds/life_250.mp3");
-    life_250OGG = new Sound("sounds/life_250.ogg");
+    crabMeetsCrabMP3 = new Sound("sounds/crab_crash.mp3");
+    crabMeetsCrabOGG = new Sound("sounds/crab_crash.ogg");
+    crabMeetsCrabellaMP3 = new Sound("sounds/crabMeetsCrabella.mp3");
+    crabMeetsCrabellaOGG = new Sound("sounds/crabMeetsCrabella.ogg");
     scene.start();
 } // end ini
 
-var index = 0;
+// var index = 0;
 var crab;
 var plant;
 var visiblePlants = 0;
@@ -106,6 +105,8 @@ function BaseCrab(image){
     };
     
     tBaseCrab.reset = function(){
+        this.hide();
+        // this.healthBar.hide();
         this.healthBar = new Bar(this.x, this.y);
         this.loadAnimation(132, 128, 33, 32);
         this.generateAnimationCycles();
@@ -122,15 +123,13 @@ function BaseCrab(image){
         this.changeDirection();
         this.pauseAnimation();
         this.setPosition(-1000, -1000);
-        this.hide();
-        this.healthBar.hide();
     }; // end reset
 
     return tBaseCrab;
 } // end tBaseCrab
 
 function Crabella(){
-    var tCrabella = new BaseCrab("img/lander/crabella.png");
+    var tCrabella = new BaseCrab("img/crab/crabella.png");
     tCrabella.gender = "Crabella";
     tCrabella.pregnant = false;
     tCrabella.pregnancy = 100;
@@ -149,6 +148,7 @@ function Crabella(){
                 }
                 newbornCrab.show(); newbornCrab.playAnimation(); newbornCrab.healthBar.show(); newbornCrab.healthBarFollow();
                 newbornCrab.setPosition(Math.random() * newbornCrab.cWidth, Math.random() * newbornCrab.cHeight);
+        born++;
                 this.pregnancy = 100;
                 this.pregnant = false;
             }
@@ -160,7 +160,7 @@ function Crabella(){
 } // end tCrabella
 
 function Crabber(){
-    var tCrabber = new BaseCrab("img/lander/crabber.png");
+    var tCrabber = new BaseCrab("img/crab/crabber.png");
     tCrabber.gender = "Crabber";
 
     tCrabber.reset();
@@ -168,7 +168,7 @@ function Crabber(){
 } // end tCrabber
 
 function Plant(){
-    var tPlant = new Sprite(scene, "img/lander/plant.png", (window.innerWidth+window.innerHeight)/25, (window.innerWidth+window.innerHeight)/25);
+    var tPlant = new Sprite(scene, "img/crab/plant.png", (window.innerWidth+window.innerHeight)/25, (window.innerWidth+window.innerHeight)/25);
     
     tPlant.reset = function(){
         this.setSpeed(0);
@@ -209,16 +209,16 @@ function checkCrabCollisions(spaceCrabNum) {// check crabs against each other
         if (crab == spaceCrabNum) continue; // dont collide with itself
         if (iterratedCrab.distanceTo(currentCrab) < 25) {
             if(iterratedCrab.gender == "Crabber" && currentCrab.gender == "Crabber"){    
-                moth_crashMP3.play();moth_crashOGG.play();
+                crabMeetsCrabMP3.play();crabMeetsCrabOGG.play();
                 iterratedCrab.health--;
                 currentCrab.health--;
             } else if (iterratedCrab.gender == "Crabella" && currentCrab.gender == "Crabber") {
-                life_250MP3.play();life_250OGG.play();
+                crabMeetsCrabellaMP3.play();crabMeetsCrabellaOGG.play();
                 if((!iterratedCrab.pregnant) && (visibleCrabs < NUMOFSPACECRABS)){
                     iterratedCrab.impregnate();
                 }
             } else if (currentCrab.gender == "Crabella" && iterratedCrab.gender == "Crabber") {
-                life_250MP3.play();life_250OGG.play();
+                crabMeetsCrabellaMP3.play();crabMeetsCrabellaOGG.play();
                 if((!currentCrab.pregnant) && (visibleCrabs < NUMOFSPACECRABS)){
                     currentCrab.impregnate();
                 }
@@ -229,7 +229,7 @@ function checkCrabCollisions(spaceCrabNum) {// check crabs against each other
 } // end checkCollisions
 
 function Bar(x, y){
-    tBar = new Sprite(scene, "img/lander/Energy.png", (window.innerWidth+window.innerHeight)/25, (window.innerWidth+window.innerHeight)/125);
+    tBar = new Sprite(scene, "img/crab/Energy.png", (window.innerWidth+window.innerHeight)/25, (window.innerWidth+window.innerHeight)/125);
     tBar.loadAnimation(30, 30, 30, 3);
     tBar.generateAnimationCycles();
     tBar.renameCycles(new Array("10", "9", "8", "7", "6", "5", "4", "3", "2", "1"));
@@ -247,11 +247,10 @@ function restart() {
 
 var showStats = function(){
     //displays stats
-    output = "DX: " + Math.round(this.dx * 10) + "<br />";
-    output += "Crabs visible: " + visibleCrabs + "<br />";
+    output = "Alive: " + visibleCrabs + "<br />";
     output += "Plants visible: " + visiblePlants + "<br />";
     output += "Dead: " + dead + "<br />";
-    output += "Creatues: " + NUMOFSPACECRABS + " and " + spacecrabs.length;
+    output += "Born: " + born;
     
     stats.innerHTML = output;
 };
@@ -270,21 +269,7 @@ var waitForFinalEvent = (function () {
 })();
 
 $(window).resize(function() {
-    var beforeResizeWidth = scene.width;
-    var beforeResizeHeight = scene.height;
     waitForFinalEvent(function(){
         scene.setSize(window.innerWidth, window.innerHeight);
-        var myResizeDivider = beforeResizeWidth/scene.width;
-        platform.setX(platform.x/myResizeDivider);
-        platform.setY(platform.y/myResizeDivider);
-
-        for (i = 0; i < spacecrabs.length; i++){
-            spacecrabs[i].setX(spacecrabs[i].x/myResizeDivider);
-            spacecrabs[i].setY(spacecrabs[i].y/myResizeDivider);
-        }
-        for (i = 0; i < NUMSPACEMOTHS; i++){
-            spacemoths[i].setX(spacemoths[i].x/myResizeDivider);
-            spacemoths[i].setY(spacemoths[i].y/myResizeDivider);
-        } // end for loop
-    }, 500, "some unique string");
+    }, 500, "resize window");
 });
